@@ -7,6 +7,12 @@ Unreleased
 - Adds new columns (year, color, total votes) to party results.
   [msom]
 
+1.4.0 (2017-05-01)
+~~~~~~~~~~~~~~~~~~~
+
+- Adds a status (unknown, interim, final) to elections and votes.
+  [msom]
+
 1.3.2 (2017-04-27)
 ~~~~~~~~~~~~~~~~~~~
 
