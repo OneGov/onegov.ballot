@@ -1,5 +1,13 @@
 Changelog
 ---------
+1.9.2 (2017-11-27)
+~~~~~~~~~~~~~~~~~~~
+
+- Improves last result change for votes.
+  [msom]
+
+1.9.1 (2017-11-27)
+~~~~~~~~~~~~~~~~~~~
 
 - Makes votes and elections polymorphic.
   [msom]
