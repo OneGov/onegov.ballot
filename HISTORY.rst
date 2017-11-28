@@ -1,5 +1,9 @@
 Changelog
 ---------
+
+- Makes votes and elections polymorphic.
+  [msom]
+
 1.9.2 (2017-11-27)
 ~~~~~~~~~~~~~~~~~~~
 

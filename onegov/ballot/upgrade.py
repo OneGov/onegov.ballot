@@ -216,3 +216,24 @@ def add_content_columns(context):
 
     if not context.has_column('votes', 'content'):
         context.operations.add_column('votes', Column('content', JSON))
+
+
+@upgrade_task('Add vote type column')
+def add_vote_type_column(context):
+    if not context.has_column('votes', 'type'):
+        context.operations.add_column('votes', Column('type', Text))
+
+        for vote in context.session.query(Vote).all():
+            meta = vote.meta or {}
+            vote.type = meta.get('vote_type', 'simple')
+            if 'vote_type' in meta:
+                del vote.meta['vote_type']
+
+
+@upgrade_task('Change election type column')
+def change_election_type_column(context):
+    type_ = Enum('proporz', 'majorz', name='type_of_election')
+    context.operations.execute(
+        'ALTER TABLE elections ALTER COLUMN type TYPE Text'
+    )
+    type_.drop(context.operations.get_bind(), checkfirst=False)

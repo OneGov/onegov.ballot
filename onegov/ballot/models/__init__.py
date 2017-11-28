@@ -16,8 +16,10 @@ from onegov.ballot.models.election import ListConnection
 from onegov.ballot.models.election import ListResult
 from onegov.ballot.models.election import PanachageResult
 from onegov.ballot.models.election import PartyResult
+from onegov.ballot.models.election import ProporzElection
 from onegov.ballot.models.vote import Ballot
 from onegov.ballot.models.vote import BallotResult
+from onegov.ballot.models.vote import ComplexVote
 from onegov.ballot.models.vote import Vote
 
 __all__ = [
@@ -25,6 +27,7 @@ __all__ = [
     'BallotResult',
     'Candidate',
     'CandidateResult',
+    'ComplexVote',
     'Election',
     'ElectionResult',
     'List',
@@ -32,5 +35,6 @@ __all__ = [
     'ListResult',
     'PanachageResult',
     'PartyResult',
+    'ProporzElection',
     'Vote',
 ]

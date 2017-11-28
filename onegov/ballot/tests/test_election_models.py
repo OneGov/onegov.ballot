@@ -9,14 +9,14 @@ from onegov.ballot import ListConnection
 from onegov.ballot import ListResult
 from onegov.ballot import PanachageResult
 from onegov.ballot import PartyResult
+from onegov.ballot import ProporzElection
 from uuid import uuid4
 
 
 def test_election_create_all_models(session):
-    election = Election(
+    election = ProporzElection(
         title="Election",
         domain='federation',
-        type='majorz',
         date=date(2015, 6, 14),
     )
 
@@ -172,7 +172,6 @@ def test_election_id_generation(session):
     election = Election(
         title='Legislative Election',
         domain='federation',
-        type='majorz',
         date=date(2015, 6, 14),
     )
 
@@ -184,7 +183,6 @@ def test_election_id_generation(session):
     election = Election(
         title='Legislative Election',
         domain='federation',
-        type='majorz',
         date=date(2015, 6, 14),
     )
 
@@ -198,7 +196,6 @@ def test_election_summarized_properties(session):
     election = Election(
         title="Election",
         domain='federation',
-        type='majorz',
         date=date(2015, 6, 14),
         number_of_mandates=2
     )
@@ -231,7 +228,6 @@ def test_derived_properties(session):
     election = Election(
         title='Legislative Election',
         domain='federation',
-        type='majorz',
         date=date(2015, 6, 14),
     )
     election.results.append(ElectionResult(
@@ -280,7 +276,6 @@ def test_election_counted(session):
     election = Election(
         title='Legislative Election',
         domain='federation',
-        type='majorz',
         date=date(2015, 6, 14),
     )
 
@@ -316,7 +311,6 @@ def test_election_last_result_change(session):
         election = Election(
             title='Legislative Election',
             domain='federation',
-            type='majorz',
             date=date(2015, 6, 14),
         )
 
@@ -362,10 +356,9 @@ def test_election_last_result_change(session):
 
 
 def test_election_has_panachage_data(session):
-    election = Election(
+    election = ProporzElection(
         title='Legislative Election',
         domain='federation',
-        type='proporz',
         date=date(2015, 6, 14),
     )
     election.lists.append(
@@ -409,10 +402,9 @@ def test_election_has_panachage_data(session):
 
 
 def test_election_results(session):
-    election = Election(
+    election = ProporzElection(
         title='Election',
         domain='federation',
-        type='majorz',
         date=date(2015, 6, 14),
         number_of_mandates=1
     )
@@ -755,7 +747,130 @@ def test_election_export(session):
     election = Election(
         title='Wahl',
         domain='federation',
-        type='majorz',
+        date=date(2015, 6, 14),
+        number_of_mandates=1,
+        absolute_majority=144,
+        counted_entities=1,
+        total_entities=2
+    )
+    election.title_translations['it_CH'] = 'Elezione'
+
+    candidate_1 = Candidate(
+        id=uuid4(),
+        elected=True,
+        candidate_id='1',
+        family_name='Quimby',
+        first_name='Joe',
+        party='Republican Party',
+    )
+    candidate_2 = Candidate(
+        id=uuid4(),
+        elected=False,
+        candidate_id='2',
+        family_name='Nahasapeemapetilon',
+        first_name='Apu',
+        party='Democratic Party',
+    )
+    election.candidates.append(candidate_1)
+    election.candidates.append(candidate_2)
+
+    session.add(election)
+    session.flush()
+
+    assert election.export() == []
+
+    election_result = ElectionResult(
+        group='group',
+        entity_id=1,
+        elegible_voters=1000,
+        received_ballots=500,
+        blank_ballots=10,
+        invalid_ballots=5,
+        blank_votes=80,
+        invalid_votes=120
+    )
+
+    election_result.candidate_results.append(
+        CandidateResult(
+            candidate_id=candidate_1.id,
+            votes=520,
+        )
+    )
+    election_result.candidate_results.append(
+        CandidateResult(
+            candidate_id=candidate_2.id,
+            votes=111
+        )
+    )
+    election.results.append(election_result)
+
+    session.flush()
+
+    assert election.export() == [
+        {
+            'election_title_de_CH': 'Wahl',
+            'election_title_it_CH': 'Elezione',
+            'election_date': '2015-06-14',
+            'election_domain': 'federation',
+            'election_type': 'majorz',
+            'election_mandates': 1,
+            'election_absolute_majority': 144,
+            'election_status': 'unknown',
+            'election_counted_entities': 1,
+            'election_total_entities': 2,
+            'entity_name': 'group',
+            'entity_id': 1,
+            'entity_elegible_voters': 1000,
+            'entity_received_ballots': 500,
+            'entity_blank_ballots': 10,
+            'entity_invalid_ballots': 5,
+            'entity_unaccounted_ballots': 15,
+            'entity_accounted_ballots': 485,
+            'entity_blank_votes': 80,
+            'entity_invalid_votes': 120,
+            'entity_accounted_votes': 285,
+            'candidate_family_name': 'Nahasapeemapetilon',
+            'candidate_first_name': 'Apu',
+            'candidate_id': '2',
+            'candidate_elected': False,
+            'candidate_party': 'Democratic Party',
+            'candidate_votes': 111,
+        }, {
+            'election_title_de_CH': 'Wahl',
+            'election_title_it_CH': 'Elezione',
+            'election_date': '2015-06-14',
+            'election_domain': 'federation',
+            'election_type': 'majorz',
+            'election_mandates': 1,
+            'election_absolute_majority': 144,
+            'election_status': 'unknown',
+            'election_counted_entities': 1,
+            'election_total_entities': 2,
+            'entity_name': 'group',
+            'entity_id': 1,
+            'entity_elegible_voters': 1000,
+            'entity_received_ballots': 500,
+            'entity_blank_ballots': 10,
+            'entity_invalid_ballots': 5,
+            'entity_unaccounted_ballots': 15,
+            'entity_accounted_ballots': 485,
+            'entity_blank_votes': 80,
+            'entity_invalid_votes': 120,
+            'entity_accounted_votes': 285,
+            'candidate_family_name': 'Quimby',
+            'candidate_first_name': 'Joe',
+            'candidate_id': '1',
+            'candidate_elected': True,
+            'candidate_party': 'Republican Party',
+            'candidate_votes': 520,
+        }
+    ]
+
+
+def test_election_export_proporz(session):
+    election = ProporzElection(
+        title='Wahl',
+        domain='federation',
         date=date(2015, 6, 14),
         number_of_mandates=1,
         absolute_majority=144,
@@ -869,7 +984,7 @@ def test_election_export(session):
             'election_title_it_CH': 'Elezione',
             'election_date': '2015-06-14',
             'election_domain': 'federation',
-            'election_type': 'majorz',
+            'election_type': 'proporz',
             'election_mandates': 1,
             'election_absolute_majority': 144,
             'election_status': 'unknown',
@@ -906,7 +1021,7 @@ def test_election_export(session):
             'election_title_it_CH': 'Elezione',
             'election_date': '2015-06-14',
             'election_domain': 'federation',
-            'election_type': 'majorz',
+            'election_type': 'proporz',
             'election_mandates': 1,
             'election_absolute_majority': 144,
             'election_status': 'unknown',
@@ -946,7 +1061,6 @@ def test_election_meta_data(session):
     election = Election(
         title='Election',
         domain='federation',
-        type='majorz',
         date=date(2015, 6, 14),
         number_of_mandates=1
     )
@@ -970,7 +1084,6 @@ def test_election_status(session):
     election = Election(
         title='Election',
         domain='federation',
-        type='majorz',
         date=date(2015, 6, 14),
         number_of_mandates=1
     )
@@ -1029,9 +1142,8 @@ def test_clear_election(session):
     cid = uuid4()
     sid = uuid4()
     lid = uuid4()
-    election = Election(
+    election = ProporzElection(
         title='Election',
-        type='majorz',
         domain='canton',
         date=date(2017, 1, 1),
         status='interim',
