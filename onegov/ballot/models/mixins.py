@@ -61,6 +61,24 @@ class StatusMixin(object):
         return self.counted
 
 
+class TitleTranslationsMixin(object):
+    """ Adds a helper to return the translation of the title without depending
+    on the locale of the request."""
+
+    def get_title(self, locale, default_locale=None):
+        """ Returns the requested translation of the title, falls back to the
+        given default locale if provided.
+
+        """
+        translations = self.title_translations or {}
+        if default_locale is None:
+            return translations.get(locale, None)
+        return (
+            translations.get(locale, None) or
+            translations.get(default_locale, None)
+        )
+
+
 def summarized_property(name):
     """ Adds an attribute as hybrid_property which returns the sum of the
     underlying results if called.

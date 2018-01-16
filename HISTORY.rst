@@ -2,6 +2,15 @@ Changelog
 ---------
 
 - Splits the group attribute of results to a district and a name atttribute.
+
+1.10.4 (2018-01-16)
+~~~~~~~~~~~~~~~~~~~
+
+- Adds a helper for getting the title translations.
+  [msom]
+
+- Uses the default locale of the site to auto-generate the ids of elections
+  and votes.
   [msom]
 
 1.10.3 (2018-01-15)
