@@ -1,5 +1,7 @@
 Changelog
 ---------
+2.0.0 (2018-01-23)
+~~~~~~~~~~~~~~~~~~~
 
 - Splits the group attribute of results to a district and a name atttribute.
   [msom]
