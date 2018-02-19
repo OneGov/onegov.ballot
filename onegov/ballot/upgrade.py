@@ -314,3 +314,16 @@ def add_region_domain(context):
         )
 
     tmp_type.drop(context.operations.get_bind(), checkfirst=False)
+
+
+@upgrade_task('Rename eligible voters columns')
+def renmame_elegible_voters_columns(context):
+    tables = (
+        'elections', 'election_results', 'ballots', 'ballot_results', 'votes'
+    )
+
+    for table in tables:
+        if context.has_column(table, 'elegible_voters'):
+            context.operations.alter_column(
+                table, 'elegible_voters', new_column_name='eligible_voters'
+            )
