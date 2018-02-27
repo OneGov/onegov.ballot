@@ -1,5 +1,9 @@
 Changelog
 ---------
+
+- Fixes json output of elected candidates.
+  [href]
+
 2.0.0 (2018-01-23)
 ~~~~~~~~~~~~~~~~~~~
 
