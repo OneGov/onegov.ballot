@@ -1,5 +1,7 @@
 Changelog
 ---------
+3.0.0 (2018-03-08)
+~~~~~~~~~~~~~~~~~~~
 
 - Adds a counted attribute to election results, removes total_entities and
   counted_entities from election.
