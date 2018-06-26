@@ -82,8 +82,11 @@ class Election(Base, ContentMixin, TimestampMixin,
         mandates = results.first()
         return mandates and mandates[0] or 0
 
+    #: Defines the type of majority (e.g. 'absolute', 'relative')
+    majority_type = meta_property('majority_type')
+
     #: Absolute majority
-    absolute_majority = Column(Integer, nullable=True, default=lambda: 0)
+    absolute_majority = Column(Integer, nullable=True)
 
     @hybrid_property
     def counted(self):
@@ -250,6 +253,10 @@ class Election(Base, ContentMixin, TimestampMixin,
 
     #: may be used to mark an election as a tacit election
     tacit = meta_property('tacit', default=False)
+
+    #: may be used to mark an election as distinct, e.g. a regional election
+    #: containing only the municipalities of one district of a canton.
+    distinct = meta_property('distinct', default=True)
 
     def clear_results(self):
         """ Clears all the results. """

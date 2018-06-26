@@ -2,7 +2,10 @@
 upgraded on the server. See :class:`onegov.core.upgrade.upgrade_task`.
 
 """
+from onegov.ballot import Election
 from onegov.ballot import Vote
+from onegov.ballot.models.election.election_compound import \
+    ElectionCompoundAssociation
 from onegov.core.orm.types import HSTORE
 from onegov.core.orm.types import JSON
 from onegov.core.upgrade import upgrade_task
@@ -376,3 +379,69 @@ def add_panachage_results_to_compounds(context):
             'target_list_id',
             new_column_name='target'
         )
+
+
+@upgrade_task(
+    'Add update contraints',
+    requires='onegov.ballot:Rename candidates tables',
+)
+def add_update_contraints(context):
+    # We use SQL (rather than operations.xxx) so that we can drop and add
+    # the constraints in one statement
+    for ref, table in (
+        ('vote', 'ballots'),
+        # ('election', 'candidates'),
+        ('election', 'election_results'),
+        ('election', 'list_connections'),
+        ('election', 'lists'),
+    ):
+        context.operations.execute(
+            f'ALTER TABLE {table} '
+            f'DROP CONSTRAINT {table}_{ref}_id_fkey, '
+            f'ADD CONSTRAINT {table}_{ref}_id_fkey'
+            f' FOREIGN KEY ({ref}_id) REFERENCES {ref}s (id)'
+            f' ON UPDATE CASCADE'
+        )
+
+    # there was a typo
+    context.operations.execute(
+        f'ALTER TABLE candidates '
+        f'DROP CONSTRAINT IF EXISTS candiates_election_id_fkey, '
+        f'DROP CONSTRAINT IF EXISTS candidates_election_id_fkey, '
+        f'ADD CONSTRAINT candidates_election_id_fkey'
+        f' FOREIGN KEY (election_id) REFERENCES elections (id)'
+        f' ON UPDATE CASCADE'
+    )
+
+
+@upgrade_task('Migrate election compounds', always_run=True)
+def migrate_election_compounds(context):
+    if (
+        context.has_table('election_compounds') and
+        context.has_table('election_compound_associations') and
+        context.has_column('election_compounds', 'elections')
+    ):
+        session = context.session
+        query = session.execute(
+            'SELECT id, akeys(elections) FROM election_compounds'
+        )
+        for election_compound_id, elections in query.fetchall():
+            for election_id in (elections or []):
+                if session.query(Election).filter_by(id=election_id).first():
+                    session.add(
+                        ElectionCompoundAssociation(
+                            election_compound_id=election_compound_id,
+                            election_id=election_id
+                        )
+                    )
+
+        context.operations.drop_column('election_compounds', 'elections')
+    else:
+        return False
+
+
+@upgrade_task('Adds a default majority type')
+def add_default_majority_type(context):
+    for election in context.session.query(Election).all():
+        if not election.majority_type:
+            election.majority_type = 'absolute'
