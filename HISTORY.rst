@@ -2,6 +2,12 @@ Changelog
 ---------
 
 - Allows to group ballot results by districts.
+  [msom
+
+- Adds candidate collections.
+  [msom]
+
+- Adds list collections.
   [msom]
 
 3.6.1 (2018-05-17)
